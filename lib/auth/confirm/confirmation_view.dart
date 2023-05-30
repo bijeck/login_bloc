@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:login_bloc/auth/auth_cubit.dart';
 import 'package:login_bloc/auth/auth_repository.dart';
 import 'package:login_bloc/auth/confirm/confirmation_bloc.dart';
 import 'package:login_bloc/auth/confirm/confirmation_event.dart';
@@ -17,6 +18,7 @@ class ConfirmationView extends StatelessWidget {
       body: BlocProvider(
         create: (context) => ConfirmationBloc(
           authRepository: context.read<AuthRepository>(),
+          authCubit: context.read<AuthCubit>(),
         ),
         child: _confirmationForm(),
       ),
@@ -52,11 +54,10 @@ class ConfirmationView extends StatelessWidget {
       builder: (context, state) {
         return TextFormField(
           validator: (value) =>
-              state.isValidCode ? null : 'Code is invalid',
+              state.isValidCode ? null : 'Confirmation Code is invalid',
           onChanged: (value) => context
               .read<ConfirmationBloc>()
               .add(ConfirmationCodeChanged(code: value)),
-          obscureText: true,
           decoration: const InputDecoration(
             icon: Icon(Icons.person),
             hintText: 'Confirmation Code',
@@ -67,7 +68,8 @@ class ConfirmationView extends StatelessWidget {
   }
 
   Widget _confirmButton() {
-    return BlocBuilder<ConfirmationBloc, ConfirmationState>(builder: (context, state) {
+    return BlocBuilder<ConfirmationBloc, ConfirmationState>(
+        builder: (context, state) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: state.formStatus is FormSubmitting
@@ -75,10 +77,12 @@ class ConfirmationView extends StatelessWidget {
             : ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    context.read<ConfirmationBloc>().add(ConfirmationSubmitted());
+                    context
+                        .read<ConfirmationBloc>()
+                        .add(ConfirmationSubmitted());
                   }
                 },
-                child: const Text('Login'),
+                child: const Text('Confirm'),
               ),
       );
     });

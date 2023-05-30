@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:login_bloc/auth/auth_cubit.dart';
 import 'package:login_bloc/auth/auth_repository.dart';
 import 'package:login_bloc/auth/form_submission_status.dart';
 import 'package:login_bloc/auth/sign_up/sign_up_bloc.dart';
@@ -17,12 +18,13 @@ class SignUpView extends StatelessWidget {
       body: BlocProvider(
         create: (context) => SignUpBloc(
           authRepository: context.read<AuthRepository>(),
+          authCubit: context.read<AuthCubit>(),
         ),
         child: Stack(
           alignment: Alignment.bottomCenter,
           children: [
             _signUpForm(),
-            _showLoginButton(),
+            _showLoginButton(context),
           ],
         ),
       ),
@@ -83,7 +85,6 @@ class SignUpView extends StatelessWidget {
           onChanged: (value) => context.read<SignUpBloc>().add(
                 SignUpUsernameChanged(username: value),
               ),
-          obscureText: true,
           decoration: const InputDecoration(
             icon: Icon(Icons.person),
             hintText: 'Username',
@@ -102,7 +103,6 @@ class SignUpView extends StatelessWidget {
           onChanged: (value) => context.read<SignUpBloc>().add(
                 SignUpEmailChanged(email: value),
               ),
-          obscureText: true,
           decoration: const InputDecoration(
             icon: Icon(Icons.person),
             hintText: 'Email',
@@ -135,11 +135,11 @@ class SignUpView extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Widget _showLoginButton() {
+  Widget _showLoginButton(BuildContext context) {
     return SafeArea(
       child: TextButton(
         child: const Text('Already have an account? Sign in.'),
-        onPressed: () {},
+        onPressed: () => context.read<AuthCubit>().showLogin(),
       ),
     );
   }

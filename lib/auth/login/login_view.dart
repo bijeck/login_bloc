@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:login_bloc/auth/auth_cubit.dart';
 import 'package:login_bloc/auth/auth_repository.dart';
 import 'package:login_bloc/auth/form_submission_status.dart';
 import 'package:login_bloc/auth/login/login_bloc.dart';
@@ -17,12 +18,13 @@ class LoginView extends StatelessWidget {
       body: BlocProvider(
         create: (context) => LoginBloc(
           authRepository: context.read<AuthRepository>(),
+          authCubit: context.read<AuthCubit>(),
         ),
         child: Stack(
           alignment: Alignment.bottomCenter,
           children: [
             _loginForm(),
-            _showSignUpButton(),
+            _showSignUpButton(context),
           ],
         ),
       ),
@@ -82,7 +84,6 @@ class LoginView extends StatelessWidget {
           onChanged: (value) => context.read<LoginBloc>().add(
                 LoginUsernameChanged(username: value),
               ),
-          obscureText: true,
           decoration: const InputDecoration(
             icon: Icon(Icons.person),
             hintText: 'Username',
@@ -115,11 +116,11 @@ class LoginView extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Widget _showSignUpButton() {
+  Widget _showSignUpButton(BuildContext context) {
     return SafeArea(
       child: TextButton(
         child: const Text('Don\'t have account? Sign up.'),
-        onPressed: () {},
+        onPressed: () => context.read<AuthCubit>().showSignUp(),
       ),
     );
   }

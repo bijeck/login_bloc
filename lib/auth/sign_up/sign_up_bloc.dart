@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:login_bloc/auth/auth_cubit.dart';
 import 'package:login_bloc/auth/auth_repository.dart';
 import 'package:login_bloc/auth/form_submission_status.dart';
 import 'package:login_bloc/auth/sign_up/sign_up_event.dart';
@@ -6,8 +7,12 @@ import 'package:login_bloc/auth/sign_up/sign_up_state.dart';
 
 class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
   final AuthRepository authRepository;
+  final AuthCubit authCubit;
 
-  SignUpBloc({required this.authRepository}) : super(SignUpState()) {
+  SignUpBloc({
+    required this.authRepository,
+    required this.authCubit,
+  }) : super(SignUpState()) {
     on<SignUpUsernameChanged>(_onSignUpUsernameChanged);
     on<SignUpPasswordChanged>(_onSignUpPasswordChanged);
     on<SignUpEmailChanged>(_onSignUpEmailChanged);
@@ -18,7 +23,6 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     SignUpUsernameChanged event,
     Emitter<SignUpState> emit,
   ) {
-    print('username changed');
     emit(state.copyWith(username: event.username));
   }
 
@@ -26,7 +30,6 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     SignUpPasswordChanged event,
     Emitter<SignUpState> emit,
   ) {
-    print('password changed');
     emit(state.copyWith(password: event.password));
   }
 
@@ -34,19 +37,27 @@ class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
     SignUpEmailChanged event,
     Emitter<SignUpState> emit,
   ) {
-    print('password changed');
-    emit(state.copyWith(password: event.email));
+    emit(state.copyWith(email: event.email));
   }
 
   void _onSignUpSubmitted(
     SignUpSubmitted event,
     Emitter<SignUpState> emit,
   ) async {
-    print('submitted');
     emit(state.copyWith(formStatus: FormSubmitting()));
     try {
-      await authRepository.login();
+      await authRepository.signUp(
+        username: state.username,
+        password: state.password,
+        email: state.email,
+      );
       emit(state.copyWith(formStatus: SubmissionSuccess()));
+
+      authCubit.showCofirmSignUp(
+        username: state.username,
+        password: state.password,
+        email: state.email,
+      );
     } catch (e) {
       emit(state.copyWith(formStatus: SubmissionFailed(e as Exception)));
     }
